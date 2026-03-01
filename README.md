@@ -223,9 +223,11 @@ Each agent has three core files inside `.agents/<agent_id>/`:
 
 ---
 
-## 📡 Channel Support
+## 📡 Channel & Group Configuration
 
-Bind your agent fleet to any [OpenClaw-supported channel](https://docs.openclaw.ai/channels/telegram):
+> **Docs**: [Groups](https://docs.openclaw.ai/channels/groups) · [Multi-Agent Routing](https://docs.openclaw.ai/concepts/multi-agent)
+
+### Supported Channels
 
 | Channel | Group ID Format | Example | Docs |
 |---------|----------------|---------|------|
@@ -235,31 +237,131 @@ Bind your agent fleet to any [OpenClaw-supported channel](https://docs.openclaw.
 | **Discord** | Guild ID | `1234567890` | [Discord docs](https://docs.openclaw.ai/channels/discord) |
 | **Slack** | Team + Channel | `T0123/C0123` | [Slack docs](https://docs.openclaw.ai/channels/slack) |
 
-### Feishu Binding Example
+### Group Policy
 
-The generated `openclaw.json` binds each agent to your Feishu group:
+OpenClaw uses a three-tier access control model for groups:
+
+| Policy | Behavior | Use Case |
+|--------|----------|----------|
+| `"open"` | All groups allowed | Testing / trusted teams |
+| `"allowlist"` | Only listed groups allowed (**default**) | Production — recommended |
+| `"disabled"` | All group messages dropped | DM-only bots |
 
 ```jsonc
 {
-  "bindings": [
-    {
-      "agentId": "planner",
-      "match": {
-        "channel": "feishu",
-        "peer": {
-          "kind": "group",
-          "id": "oc_b1c331592eaa36d06a7e5df05d08a890"
+  "channels": {
+    "feishu": {
+      "groupPolicy": "allowlist",              // ← recommended
+      "groupAllowFrom": ["oc_YOUR_GROUP_ID"],  // ← restrict to your group
+      "groups": {
+        "oc_YOUR_GROUP_ID": {
+          "requireMention": true               // ← must @mention to trigger
         }
       }
     }
-    // ... one binding per agent
-  ]
+  }
 }
 ```
 
-> **Finding your Feishu Group ID**: Run `openclaw channels feishu groups` to list all group chat_ids.
+### Mention Gating
 
-Pre-built config examples: [`examples/openclaw.feishu.json`](examples/openclaw.feishu.json) · [`examples/openclaw.whatsapp.json`](examples/openclaw.whatsapp.json)
+In groups, agents **only respond when @mentioned** (default: `requireMention: true`). Each agent can have custom `mentionPatterns`:
+
+```jsonc
+{
+  "agents": {
+    "list": [
+      {
+        "id": "planner",
+        "name": "🧠 Planner",
+        // ...
+        "groupChat": {
+          "mentionPatterns": ["@planner", "planner", "@Planner"],  // case-insensitive regex
+          "historyLimit": 50   // context window for group messages
+        }
+      }
+    ]
+  }
+}
+```
+
+> **How it works**: Type `@planner 请分解这个任务` in the group, and only the 🧠 Planner agent will respond.
+
+Messages that don't match any mention pattern are **stored for context** but don't trigger a reply — this allows agents to follow the conversation passively.
+
+### Session Keys
+
+Each agent gets an isolated session per group:
+
+```
+agent:<agentId>:<channel>:group:<groupId>
+```
+
+| Session | Key Example |
+|---------|-------------|
+| Planner in Feishu group | `agent:planner:feishu:group:oc_xxx` |
+| Coder in Telegram group | `agent:coder:telegram:group:-1001234567890` |
+| Main in DM | `agent:main:main` |
+
+Telegram forum topics add `:topic:<threadId>` for per-topic isolation.
+
+### Sandbox & Tool Restrictions
+
+By default, the setup script configures **sandbox isolation for group sessions**:
+
+```jsonc
+{
+  "agents": {
+    "defaults": {
+      "sandbox": {
+        "mode": "non-main",         // groups are sandboxed
+        "scope": "session",          // one container per group
+        "workspaceAccess": "none"    // no host filesystem access
+      }
+    }
+  }
+}
+```
+
+You can also restrict tools per group or per sender:
+
+```jsonc
+{
+  "channels": {
+    "telegram": {
+      "groups": {
+        "-1001234567890": {
+          "tools": {
+            "deny": ["exec", "write"]                   // block risky tools
+          },
+          "toolsBySender": {
+            "id:123456789": { "alsoAllow": ["exec"] }   // override for trusted user
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Display Labels
+
+Agents show as `<emoji> <name>` in chat (configured via `identity.name`):
+
+| What You Type | Who Replies |
+|--------------|-------------|
+| `@planner 分解一下任务` | 🧠 Planner |
+| `@critic 评估这个 idea` | 🎯 Critic |
+| `@coder 跑一下实验` | 💻 Coder |
+| `@writer 写 related work` | ✍️ Writer |
+
+### Pre-built Examples
+
+| Channel | Config | Key Features |
+|---------|--------|-------------|
+| Feishu | [`openclaw.feishu.json`](examples/openclaw.feishu.json) | All 9 agents, allowlist, mention gating |
+| WhatsApp | [`openclaw.whatsapp.json`](examples/openclaw.whatsapp.json) | DM pairing, sender allowlist |
+| Telegram | [`openclaw.telegram.json`](examples/openclaw.telegram.json) | Tool restrictions per group |
 
 ---
 
@@ -333,7 +435,8 @@ openclaw-agents/
 │   └── installation.md               # 📖 Full installation guide (for LLM agents)
 ├── examples/
 │   ├── openclaw.feishu.json          # Feishu config example
-│   └── openclaw.whatsapp.json        # WhatsApp config example
+│   ├── openclaw.whatsapp.json        # WhatsApp config example
+│   └── openclaw.telegram.json        # Telegram config example
 └── .agents/
     ├── planner/                      # 🧠 soul.md + agent.md + user.md
     ├── ideator/                      # 💡 soul.md + agent.md + user.md

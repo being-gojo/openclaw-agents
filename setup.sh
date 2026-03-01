@@ -301,6 +301,8 @@ configure_bindings() {
   step "Configuring channel bindings (${CHANNEL})"
 
   # Build the agents list for openclaw.json
+  # Each agent gets: identity, groupChat.mentionPatterns, historyLimit
+  # See: https://docs.openclaw.ai/channels/groups#mention-gating-default
   local agents_json='['
   local first=true
   for entry in "${CORE_AGENTS[@]}"; do
@@ -316,7 +318,12 @@ configure_bindings() {
       "id": "${id}",
       "name": "${emoji} ${name}",
       "workspace": "${workspace}",
-      "model": "${MODEL}"
+      "model": "${MODEL}",
+      "identity": { "name": "${emoji} ${name}" },
+      "groupChat": {
+        "mentionPatterns": ["@${id}", "${id}", "@${name}"],
+        "historyLimit": 50
+      }
     }
 AJSON
 )"
@@ -324,6 +331,7 @@ AJSON
   agents_json+=']'
 
   # Build bindings array — bind each agent to the group
+  # See: https://docs.openclaw.ai/concepts/multi-agent#routing-rules-how-messages-pick-an-agent
   local bindings_json='['
   first=true
   for entry in "${CORE_AGENTS[@]}"; do
@@ -349,14 +357,46 @@ BJSON
   done
   bindings_json+=']'
 
+  # Build channel config with group policy and mention gating
+  # See: https://docs.openclaw.ai/channels/groups#group-policy
+  local channel_config
+  channel_config="$(cat <<CHCFG
+{
+      "${CHANNEL}": {
+        "groupPolicy": "allowlist",
+        "groupAllowFrom": ["${GROUP_ID}"],
+        "groups": {
+          "${GROUP_ID}": {
+            "requireMention": true
+          }
+        }
+      }
+    }
+CHCFG
+)"
+
   # Build the complete config patch
+  # Includes: agents list, bindings, channel config, sandbox defaults, groupChat settings
   local config_patch
   config_patch="$(cat <<CONFIG
 {
   "agents": {
-    "list": ${agents_json}
+    "list": ${agents_json},
+    "defaults": {
+      "sandbox": {
+        "mode": "non-main",
+        "scope": "session",
+        "workspaceAccess": "none"
+      }
+    }
   },
-  "bindings": ${bindings_json}
+  "bindings": ${bindings_json},
+  "channels": ${channel_config},
+  "messages": {
+    "groupChat": {
+      "historyLimit": 50
+    }
+  }
 }
 CONFIG
 )"

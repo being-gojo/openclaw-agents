@@ -47,36 +47,40 @@
         {
             "agentId": "main",
             "match": {
-                "channel": "whatsapp",
+                "channel": "telegram",
                 "peer": {
                     "kind": "group",
-                    "id": "YOUR_GROUP_ID@g.us"
+                    "id": "-1001234567890"
                 }
             }
         },
         {
             "agentId": "planner",
             "match": {
-                "channel": "whatsapp",
+                "channel": "telegram",
                 "peer": {
                     "kind": "group",
-                    "id": "YOUR_GROUP_ID@g.us"
+                    "id": "-1001234567890"
                 }
             }
         }
     ],
     "channels": {
-        "whatsapp": {
+        "telegram": {
             "groupPolicy": "allowlist",
             "groupAllowFrom": [
-                "+15551234567"
+                "123456789"
             ],
             "groups": {
-                "YOUR_GROUP_ID@g.us": {
-                    "requireMention": true
+                "-1001234567890": {
+                    "requireMention": true,
+                    "tools": {
+                        "deny": [
+                            "exec"
+                        ]
+                    }
                 }
-            },
-            "dmPolicy": "pairing"
+            }
         }
     },
     "messages": {

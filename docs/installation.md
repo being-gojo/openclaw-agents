@@ -134,7 +134,12 @@ The setup script will:
 2. 🤖 Create 8 sub-agents via `openclaw agents add <id> --model <model> --workspace <path>`
 3. 🎨 Set visual identities via `openclaw agents set-identity --agent <id> --name "<emoji> <name>"`
 4. 📝 Deploy `soul.md` / `agent.md` / `user.md` into each agent's workspace
-5. 🔗 Generate `openclaw.json` with `agents.list` and `bindings` arrays
+5. 🔗 Generate `openclaw.json` with:
+   - `agents.list` — all agents with `identity`, `mentionPatterns`, `historyLimit`
+   - `agents.defaults.sandbox` — group session isolation (mode: `non-main`, scope: `session`)
+   - `bindings` — route each agent to the target group
+   - `channels.<channel>` — `groupPolicy: "allowlist"`, `requireMention: true`
+   - `messages.groupChat.historyLimit` — global context window
 6. ✅ Run verification checks
 
 ### Step 4: Verify Setup
