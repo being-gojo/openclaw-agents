@@ -242,11 +242,11 @@ set_identities() {
 
 # ── Deploy Workspace Files (UPPERCASE) ──────────────────────
 deploy_workspace_files() {
-  step "Deploying workspace files (SOUL.md / AGENT.md / USER.md / AGENTS.md)"
+  step "Deploying workspace files (SOUL.md / AGENT.md / USER.md + appending workflows to AGENTS.md)"
 
   # ── Source raw templates from repo root ──
   local raw_soul="${SCRIPT_DIR}/SOUL_raw.md"
-  local raw_agents="${SCRIPT_DIR}/AGENTS.md"
+
   local raw_user="${SCRIPT_DIR}/USER.md"
 
   for entry in "${CORE_AGENTS[@]}"; do
@@ -367,12 +367,143 @@ AGENTFILE
       success "${id}/AGENT.md ✓ (created)"
     fi
 
-    # ── AGENTS.md: Copy from repo root ───────────────────────
+    # ── AGENTS.md: Append workflow instructions ────────────────
+    # OpenClaw auto-generates AGENTS.md when creating an agent.
+    # We APPEND workflow-specific instructions for this agent,
+    # so it knows what workflows it participates in and its role.
     local dst_agents="${workspace}/AGENTS.md"
-    if [[ -f "${raw_agents}" ]]; then
-      cp "${raw_agents}" "${dst_agents}"
-      success "${id}/AGENTS.md ✓ (from repo root)"
-    fi
+    local wf_dir="${AGENTS_DIR}/workflows"
+
+    # Build agent-specific workflow appendix
+    {
+      echo ""
+      echo "---"
+      echo ""
+      echo "# 📋 Workflow Reference for ${emoji} ${name}"
+      echo ""
+      echo "The following workflows involve you. Read the relevant ones when activated."
+      echo ""
+
+      case "${id}" in
+        planner)
+          echo "## Your Workflows (Orchestrator role in all)"
+          echo "- \`/paper-pipeline\` — You orchestrate the entire paper production process"
+          echo "- \`/brainstorm\` — You prepare context and coordinate the brainstorm session"
+          echo "- \`/rebuttal\` — You coordinate the rebuttal strategy and task assignment"
+          echo "- \`/daily-digest\` — You receive alerts from Scout when action is needed"
+          echo ""
+          for wf in paper-pipeline brainstorm rebuttal daily-digest; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        ideator)
+          echo "## Your Workflows"
+          echo "- \`/brainstorm\` — You lead idea generation (Step 2, 4, 6)"
+          echo "- \`/paper-pipeline\` — Phase 2 (Idea gen), Phase 3 (Method design)"
+          echo ""
+          for wf in brainstorm paper-pipeline; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        critic)
+          echo "## Your Workflows"
+          echo "- \`/brainstorm\` — Step 5.5: You are the taste gate (SHARP ≥ 18 to pass)"
+          echo "- \`/paper-pipeline\` — Phase 2.5, Phase 3, Phase 6, Phase 7: Taste checkpoints"
+          echo ""
+          for wf in brainstorm paper-pipeline; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        surveyor)
+          echo "## Your Workflows"
+          echo "- \`/brainstorm\` — Step 3: Novelty verification"
+          echo "- \`/paper-pipeline\` — Phase 1: Literature survey"
+          echo "- \`/rebuttal\` — Provide missing references"
+          echo ""
+          for wf in brainstorm paper-pipeline rebuttal; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        coder)
+          echo "## Your Workflows"
+          echo "- \`/paper-pipeline\` — Phase 4 (Implementation), Phase 5 (Experiments)"
+          echo "- \`/rebuttal\` — Run supplementary experiments requested by reviewers"
+          echo ""
+          for wf in paper-pipeline rebuttal; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        writer)
+          echo "## Your Workflows"
+          echo "- \`/paper-pipeline\` — Phase 6 (Draft), Phase 7 (Revision)"
+          echo "- \`/rebuttal\` — Step 3-4: Prepare revision and write rebuttal"
+          echo ""
+          for wf in paper-pipeline rebuttal; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        reviewer)
+          echo "## Your Workflows"
+          echo "- \`/paper-pipeline\` — Phase 7: Internal peer review"
+          echo "- \`/rebuttal\` — Step 1 (Analyze reviews), Step 5 (Review rebuttal draft)"
+          echo ""
+          for wf in paper-pipeline rebuttal; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+        scout)
+          echo "## Your Workflows"
+          echo "- \`/daily-digest\` — You lead this workflow end-to-end"
+          echo "- \`/paper-pipeline\` — Phase 0: Trend sensing"
+          echo "- \`/brainstorm\` — Step 1: Provide recent hot papers"
+          echo ""
+          for wf in daily-digest paper-pipeline brainstorm; do
+            [[ -f "${wf_dir}/${wf}.md" ]] && {
+              echo "---"
+              echo ""
+              cat "${wf_dir}/${wf}.md"
+              echo ""
+            }
+          done
+          ;;
+      esac
+    } >> "${dst_agents}"
+    success "${id}/AGENTS.md ✓ (workflow instructions appended)"
 
   done
 }
@@ -659,10 +790,10 @@ summary() {
   fi
   echo ""
   echo -e "  ${BOLD}Workspace files:${NC} SOUL.md AGENT.md USER.md AGENTS.md (UPPERCASE)"
-  echo -e "  ${DIM}  SOUL.md  = SOUL_raw.md (generic) + soul.md (agent-specific)${NC}"
-  echo -e "  ${DIM}  USER.md  = USER.md (template) + user.md (agent-specific)${NC}"
-  echo -e "  ${DIM}  AGENT.md = agent.md (agent config with model updated)${NC}"
-  echo -e "  ${DIM}  AGENTS.md = workspace conventions (from repo root)${NC}"
+  echo -e "  ${DIM}  SOUL.md  = SOUL_raw.md (generic) + soul.md (agent-specific identity)${NC}"
+  echo -e "  ${DIM}  USER.md  = USER.md (template) + user.md (agent-specific context)${NC}"
+  echo -e "  ${DIM}  AGENT.md = agent.md (config with model updated)${NC}"
+  echo -e "  ${DIM}  AGENTS.md = auto-generated + workflow instructions appended${NC}"
   echo ""
   echo -e "  ${DIM}Your main agent is implicit and uses agents.defaults.${NC}"
   echo -e "  ${DIM}Existing agents and all other settings were preserved.${NC}"
