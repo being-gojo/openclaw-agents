@@ -67,10 +67,7 @@
     ],
     "channels": {
         "telegram": {
-            "groupPolicy": "allowlist",
-            "groupAllowFrom": [
-                "123456789"
-            ],
+            "groupPolicy": "open",
             "groups": {
                 "-1001234567890": {
                     "requireMention": true,

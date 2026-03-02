@@ -483,11 +483,7 @@ BJSON
       # Merge channel config (preserve existing keys like appId, appSecret, token)
       | .channels[$channel] = (
         (.channels[$channel] // {}) * {
-          "groupPolicy": "allowlist",
-          "groupAllowFrom": (
-            [(.channels[$channel].groupAllowFrom // [])[] | select(. != $group_id)]
-            + [$group_id]
-          ),
+          "groupPolicy": "open",
           "groups": ((.channels[$channel].groups // {}) * {
             ($group_id): { "requireMention": true }
           })
@@ -519,8 +515,7 @@ BJSON
     channel_config="$(cat <<CHCFG
 {
       "${CHANNEL}": {
-        "groupPolicy": "allowlist",
-        "groupAllowFrom": ["${GROUP_ID}"],
+        "groupPolicy": "open",
         "groups": {
           "${GROUP_ID}": {
             "requireMention": true

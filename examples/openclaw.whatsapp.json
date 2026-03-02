@@ -67,10 +67,7 @@
     ],
     "channels": {
         "whatsapp": {
-            "groupPolicy": "allowlist",
-            "groupAllowFrom": [
-                "+15551234567"
-            ],
+            "groupPolicy": "open",
             "groups": {
                 "YOUR_GROUP_ID@g.us": {
                     "requireMention": true

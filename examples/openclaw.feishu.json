@@ -258,10 +258,7 @@
     ],
     "channels": {
         "feishu": {
-            "groupPolicy": "allowlist",
-            "groupAllowFrom": [
-                "oc_YOUR_GROUP_ID_HERE"
-            ],
+            "groupPolicy": "open",
             "groups": {
                 "oc_YOUR_GROUP_ID_HERE": {
                     "requireMention": true

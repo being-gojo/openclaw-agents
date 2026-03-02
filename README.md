@@ -246,16 +246,15 @@ OpenClaw uses a three-tier access control model for groups:
 
 | Policy | Behavior | Use Case |
 |--------|----------|----------|
-| `"open"` | All groups allowed | Testing / trusted teams |
-| `"allowlist"` | Only listed groups allowed (**default**) | Production — recommended |
+| `"open"` | All groups allowed (**default**) | Personal servers, trusted teams |
+| `"allowlist"` | Only listed groups allowed | Multi-tenant / production |
 | `"disabled"` | All group messages dropped | DM-only bots |
 
 ```jsonc
 {
   "channels": {
     "feishu": {
-      "groupPolicy": "allowlist",              // ← recommended
-      "groupAllowFrom": ["oc_YOUR_GROUP_ID"],  // ← restrict to your group
+      "groupPolicy": "open",                    // ← all groups allowed
       "groups": {
         "oc_YOUR_GROUP_ID": {
           "requireMention": true               // ← must @mention to trigger
@@ -362,8 +361,8 @@ Agents show as `<emoji> <name>` in chat (configured via `identity.name`):
 
 | Channel | Config | Key Features |
 |---------|--------|-------------|
-| Feishu | [`openclaw.feishu.json`](examples/openclaw.feishu.json) | All 9 agents, allowlist, mention gating |
-| WhatsApp | [`openclaw.whatsapp.json`](examples/openclaw.whatsapp.json) | DM pairing, sender allowlist |
+| Feishu | [`openclaw.feishu.json`](examples/openclaw.feishu.json) | All 9 agents, open policy, mention gating |
+| WhatsApp | [`openclaw.whatsapp.json`](examples/openclaw.whatsapp.json) | DM pairing, open policy |
 | Telegram | [`openclaw.telegram.json`](examples/openclaw.telegram.json) | Tool restrictions per group |
 
 ---

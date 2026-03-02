@@ -147,7 +147,7 @@ The setup script will:
    - `agents.list` — all agents with `identity`, `mentionPatterns`, `historyLimit`
    - `agents.defaults.sandbox` — group session isolation (mode: `non-main`, scope: `session`)
    - `bindings` — route each agent to the target group
-   - `channels.<channel>` — `groupPolicy: "allowlist"`, `requireMention: true`
+   - `channels.<channel>` — `groupPolicy: "open"`, `requireMention: true`
    - `messages.groupChat.historyLimit` — global context window
 6. ✅ Run verification checks
 
